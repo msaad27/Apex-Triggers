@@ -25,4 +25,30 @@ public class ApexTriggerOpp {
             }
         }
     }
+    public static void createTaskForOwner(List<Opportunity> oppRec) {
+        Set<Id> accId = new Set<Id>();
+        Map<Id, Id> oppvsAccId = new Map<Id, Id>();
+        Map<Id, Id> accIdvsOwnerId = new Map<Id, Id>();
+        for(Opportunity opp : oppRec){
+            accId.add(opp.AccountId);
+            oppvsAccId.put(opp.Id, opp.AccountId);
+        }
+        List<Account> accountRecords = [SELECT Id, OwnerId FROM Account WHERE Id IN :accId];
+        for(Account acc: accountRecords){
+            accIdvsOwnerId.put(acc.Id, acc.OwnerId);
+        }
+       List<Task> taskRecList = new List<Task>();
+        for(Opportunity opp : oppRec){
+        Task taskRec = new Task();
+        taskRec.Description = 'Opportunity Deleted';
+        taskRec.OwnerId=oppvsAccId.get(accIdvsOwnerId.get(opp.Id));
+        taskRec.Priority = 'High';
+        taskRec.Status = 'Not Started';
+        taskRec.Subject = 'Opportunity Deletion Alert';
+        taskRecList.add(taskRec);
+       }
+         if(!taskRecList.isEmpty()){
+          insert taskRecList;
+         }
+    }
 }
