@@ -79,7 +79,26 @@ public class ApexTriggerOpp {
          }
     }
 
-   
+    //Use case 18 : As soon as Opportunity Stage reaches Needs Analysis, add all users of role Opportunists to the Team.
+    public static void addTeamMembers(List<Opportunity> oppRec, Map<Id, Opportunity> oldMap){
+        List<OpportunityTeamMember> oppMemberList = new List<OpportunityTeamMember>();
+        List<User> userList = [SELECT Id FROM User WHERE isActive=true AND UserRole.Name = 'Opportunists'];
+        for(Opportunity opp : oppRec){
+            if(opp.StageName == 'Needs Analysis' && opp.StageName!= oldMap.get(opp.Id).StageName){
+                for(User userRec : userList){
+                    OpportunityTeamMember oppTeamMember = new OpportunityTeamMember();
+                    oppTeamMember.OpportunityId = opp.Id;
+                    oppTeamMember.UserId = userRec.Id;
+                    oppTeamMember.OpportunityAccessLevel = 'Edit';
+                    oppMemberList.add(oppTeamMember);
+                }
+            }
+        }
+        if(!oppMemberList.isEmpty()){
+            insert oppMemberList;
+        }
+    }
+        
 
    
 }
