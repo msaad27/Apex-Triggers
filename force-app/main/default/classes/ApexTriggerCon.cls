@@ -22,4 +22,24 @@ public class ApexTriggerCon {
             }
         }
     }
+
+    // Use case 17 : Share the contact record with a public group as soon as a record is created
+    public static void shareCon(List<Contact> newCon){
+        Id conPublicGroup = [SELECT Id FROM Group WHERE Name='Contact Public Group' LIMIT 1].Id;
+         List<ContactShare> conShareList = new List<ContactShare>();
+        for(Contact con : newCon){
+            ContactShare conShare = new ContactShare();
+            conShare.ContactId = con.Id;
+            conShare.RowCause = 'Manual';
+            conShare.UserOrGroupId = conPublicGroup;
+            conShare.ContactAccessLevel = 'Edit';
+            conShareList.add(conShare);
+        }
+        if (!conShareList.isEmpty()) {
+            insert conShareList;
+            
+        }
+             
+        }
+    
 }
