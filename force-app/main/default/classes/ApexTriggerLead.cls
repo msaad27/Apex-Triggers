@@ -1,6 +1,6 @@
 public class ApexTriggerLead {
-
-    // Prevent deletion of Leads with the status 'Working - Contacted'
+    
+    // Use case 12: Whenever a Lead is deleted, if the Lead Status is 'Working - Contacted', prevent the deletion and display an error message "Cannot delete lead with status 'Working - Contacted'".
     public static void preventDel(List<Lead> leadRecords) {
         for (Lead lead : leadRecords) {
             // Check the status and add an error if it matches
@@ -10,14 +10,14 @@ public class ApexTriggerLead {
         }
     }
 
-    // Update Status to 'Working - Contacted'
+   //Use case 2 : Whenever a Lead record is updated, set the Lead Status to Working-Contacted
     public static void updateStatus(List<Lead> updateLeadStatus) {
         for (Lead newLead : updateLeadStatus) {
             newLead.Status = 'Working - Contacted';
         }
     }
 
-    // Update Source and related fields based on Industry
+    // Use case 4: Whenever a Lead record is updated, if the Industry is 'Healthcare', set Lead Source to 'Purchase List', SIC Code to '1100', and Primary to 'Yes'. If Industry is not 'Healthcare', clear these fields.
     public static void updateSource(List<Lead> leadRecords) {
         for (Lead newLead : leadRecords) {
             if (newLead.Industry == 'Healthcare') {
@@ -33,7 +33,7 @@ public class ApexTriggerLead {
         }
     }
 
-    // Create tasks related to new leads
+    // Use case 6: Whenever a Lead is created, create a Task with Description as 'Follow up' and assign it to the Lead Owner.
     public static void createTask(List<Lead> newRecords) {
         List<Task> insertTask = new List<Task>();
 
@@ -50,7 +50,7 @@ public class ApexTriggerLead {
         }
     }
 
-    // Ensure that 'Hot' leads have a valid Industry
+    //use case  12: Whenever a Lead's Rating is 'Cold' and Industry is not 'Energy', prevent the update and display an error message "Enter Industry for Cold rated leads".
     public static void validIndustry(List<Lead> leadRecords) {
         for (Lead l : leadRecords) {
             if (l.Rating == 'Cold' && l.Industry != 'Energy') {

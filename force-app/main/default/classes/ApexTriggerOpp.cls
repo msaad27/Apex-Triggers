@@ -1,6 +1,16 @@
 public class ApexTriggerOpp {
+
+
+    // Use case 5: Whenever an Opportunity is created with StageName as 'Closed Won', create a Task with Priority as 'High', Status as 'Not Started', Description as 'Split Revenue', and assign it to the Opportunity Owner.
    public static void createTask(List<Opportunity> newOpp){
         List<Task> insertTask=new List<Task>();
+        List<OpportunityTeamMember> deleteMember=new List<OpportunityTeamMember>();
+        List<Id> oppIds=new List<Id>();
+        for(Opportunity opp: newOpp){
+            oppIds.add(opp.Id);
+        }
+
+        List<OpportunityTeamMember> teamMembers=[SELECT Id,OpportunityId FROM OpportunityTeamMember WHERE OpportunityId IN :oppIds];
         for(Opportunity opp: newOpp){
             if(opp.StageName=='Closed Won'){
                 
@@ -13,11 +23,26 @@ public class ApexTriggerOpp {
                 
                 insertTask.add(taskRec);
             }
+
+         // Use case 15 : Whenever an Opportunity is Closed Lost, remove all Opportunity Team Members from the Opportunity
+            else if(opp.StageName=='Closed Lost'){
+                for(OpportunityTeamMember member: teamMembers){
+                    if(member.OpportunityId==opp.Id){
+                        deleteMember.add(member);
+                    }
+                }
+
+            }
         }
         if(!insertTask.isEmpty()){
 		insert insertTask;
         }
+        if(!deleteMember.isEmpty()){
+            delete deleteMember;
+        }
     }
+
+    // Use case 7: Whenever an Opportunity's StageName is changed, update the Amount field to be the product of Probability and ExpectedRevenue.
     public static void modifyOpp(List<Opportunity> oppRec,Map<Id,Opportunity> oldMap){
         for(Opportunity opp : oppRec){
             if(oldMap.get(opp.Id).StageName != opp.StageName){
@@ -25,6 +50,8 @@ public class ApexTriggerOpp {
             }
         }
     }
+
+    //use case 13: Whenever an Opportunity is deleted, create a Task with Description as 'Opportunity Deleted' and assign it to the Account Owner associated with the deleted Opportunity. Set the Task's Priority to 'High', Status to 'Not Started', and Subject to 'Opportunity Deletion Alert'.
     public static void createTaskForOwner(List<Opportunity> oppRec) {
         Set<Id> accId = new Set<Id>();
         Map<Id, Id> oppvsAccId = new Map<Id, Id>();
@@ -51,4 +78,8 @@ public class ApexTriggerOpp {
           insert taskRecList;
          }
     }
+
+   
+
+   
 }
