@@ -9,5 +9,16 @@ public class ApexTriggerCase {
             else c.Priority='Low';
         }
     }
- 
+
+    //Use case 16 : Allow Case Deletion only by System Admin users
+    public static void preventCaseDel(List<Case> caseRec){
+        Id currentUserId=UserInfo.getUserId();
+        Id sysAdminProfileId=[SELECT Id FROM Profile WHERE Name='System Administrator' LIMIT 1].Id;
+        if(currentUserId!=sysAdminProfileId){
+            for(Case c : caseRec){
+                c.addError('Only System Admin can delete Case');
+            }
+        }
+    }
+        
 }
