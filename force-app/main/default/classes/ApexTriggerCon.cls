@@ -41,5 +41,30 @@ public class ApexTriggerCon {
         }
              
         }
-    
+
+
+        // Use case 20 : Send an email to the Account Owner when email or phone of a child contact is modified
+        public static void sendEmail(List<Contact> newCon,Map<Id,Contact> oldMap){
+            List<Id> accIds = new List<Id>();
+            for(Contact con : newCon){
+                if(con.AccountId != null){
+                    if(con.Email != oldMap.get(con.Id).Email || con.Phone != oldMap.get(con.Id).Phone){
+                        accIds.add(con.AccountId);
+                    }
+                }
+            }
+            if (!accIds.isEmpty()) {
+                Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+                List<String> toAddresses = new List<String>();
+                List<Account> accounts = [SELECT Owner.Email FROM Account WHERE Id IN :accIds];
+                for(Account acc : accounts){
+                    toAddresses.add(acc.Owner.Email);
+                }
+                mail.setToAddresses(toAddresses);
+                mail.setSubject('Contact Information Updated');
+                mail.setPlainTextBody('The email or phone number of a child contact has been modified.');
+                Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+                
+            }
+        }
 }
