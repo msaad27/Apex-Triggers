@@ -20,6 +20,23 @@ public class ApexTriggerCon {
                     c.addError('Duplicate Contact found with same Last Name, Email, or Phone.');
                 }
             }
+
+            // Use case 21 : Whenever a Contact record is created, copy BillingAddress of Account to MailingAddress on Contact
+            List<Id> accId=new List<Id>();
+            for(Contact con : newCon){
+                accId.add(con.AccountId);
+            }
+            Map<Id,Account> accMap=new Map<Id,Account>([SELECT Id,BillingStreet,BillingCity,BillingState,BillingPostalCode,BillingCountry FROM Account WHERE Id IN :accId]);
+            for(Contact con: newCon){
+                if(accMap.containsKey(con.AccountId)){
+                    con.MailingStreet=accMap.get(con.AccountId).BillingStreet;
+                    con.MailingCity=accMap.get(con.AccountId).BillingCity;
+                    con.MailingState=accMap.get(con.AccountId).BillingState;
+                    con.MailingPostalCode=accMap.get(con.AccountId).BillingPostalCode;
+                    con.MailingCountry=accMap.get(con.AccountId).BillingCountry;
+                }
+            }
+
         }
     }
 
@@ -64,7 +81,7 @@ public class ApexTriggerCon {
                 mail.setSubject('Contact Information Updated');
                 mail.setPlainTextBody('The email or phone number of a child contact has been modified.');
                 Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
-                
+
             }
         }
 }
