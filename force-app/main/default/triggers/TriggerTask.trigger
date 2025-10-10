@@ -1,4 +1,4 @@
-trigger TriggerTask on Task (before insert,after insert) {
+trigger TriggerTask on Task (before insert,after insert,before update) {
 	if(Trigger.isBefore&& Trigger.isInsert)
 
         {
@@ -6,5 +6,8 @@ trigger TriggerTask on Task (before insert,after insert) {
         }
     if(Trigger.isAfter && Trigger.isInsert) {
         ApexTriggerTask.incrementTaskCount(Trigger.new);
+    }
+    if(Trigger.isBefore && Trigger.isUpdate) {
+        ApexTriggerTask.handleBeforeUpdate(Trigger.new);
     }
 }
