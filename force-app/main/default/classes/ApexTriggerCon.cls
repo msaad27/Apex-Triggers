@@ -21,12 +21,28 @@ public class ApexTriggerCon {
                 }
             }
 
+            // Use Case 23 : Do not allow Contact association if Max Contacts Allowed value is exceeded on the Account record
+            
+            Map<Id,Id>conVsAccIdMap=new Map<Id,Id>();
+           
+
             // Use case 21 : Whenever a Contact record is created, copy BillingAddress of Account to MailingAddress on Contact
             List<Id> accId=new List<Id>();
             for(Contact con : newCon){
                 accId.add(con.AccountId);
+                 conVsAccIdMap.put(con.Id,con.AccountId);
             }
-            Map<Id,Account> accMap=new Map<Id,Account>([SELECT Id,BillingStreet,BillingCity,BillingState,BillingPostalCode,BillingCountry FROM Account WHERE Id IN :accId]);
+            Map<Id,Account> accMap=new Map<Id,Account>([SELECT Id,Max_Contacts_Allowed__c,BillingStreet,BillingCity,BillingState,BillingPostalCode,BillingCountry,(SELECT Id FROM Contacts) FROM Account WHERE Id IN :accId]);
+            for(Id accIds:accMap.keySet()){
+                Integer numOfConPerAcc=(accMap.get(accIds).contacts).size();
+                if(accMap.get(accIds).Max_Contacts_Allowed__c<numOfConPerAcc){
+                    for(Contact con:newCon){
+                        if(con.AccountId==accIds){
+                            con.addError('This contact insertion is not allowed');
+                        }
+                    }
+                }
+            }
             for(Contact con: newCon){
                 if(accMap.containsKey(con.AccountId)){
                     con.MailingStreet=accMap.get(con.AccountId).BillingStreet;
